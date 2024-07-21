@@ -46,7 +46,6 @@ app.get('/callback', async (req, res) => {
   }
 
   try {
-    // Generate the HMAC hash to verify the authenticity of the request
     const generatedHmac = crypto
       .createHmac('sha256', SHOPIFY_CLIENT_SECRET)
       .update(
@@ -76,16 +75,15 @@ app.get('/callback', async (req, res) => {
     );
 
     accessToken = response.data.access_token;
-    // Log the access token to the console
-    console.log('Access Token:', accessToken);
+    console.log('Access Token:', accessToken); // Ensure this logs correctly
 
     res.send('Authorization successful! You can now close this tab.');
   } catch (error) {
     console.error(
-      'Error exchanging code for access token:',
+      'Error during callback:',
       error.response ? error.response.data : error.message
     );
-    res.status(500).send(error.message);
+    res.status(500).send('Error during callback');
   }
 });
 
@@ -98,6 +96,8 @@ app.post('/api/create-customer', async (req, res) => {
       .status(401)
       .json({ message: 'Unauthorized: Missing access token.' });
   }
+
+  console.log(accessToken);
 
   try {
     const response = await axios.post(
@@ -132,6 +132,10 @@ app.post('/api/create-customer', async (req, res) => {
     );
     res.status(500).json({ message: error.message });
   }
+});
+
+app.get('/api/check-token', (req, res) => {
+  res.json({ accessToken });
 });
 
 console.log(accessToken);
