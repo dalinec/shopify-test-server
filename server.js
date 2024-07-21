@@ -22,8 +22,10 @@ app.get('/auth', (req, res) => {
     return res.status(400).send('Missing shop parameter.');
   }
 
-  const redirectUri = `https://${req.get('host')}/callback`;
-  const installUrl = `https://${shop}/admin/oauth/authorize?client_id=${SHOPIFY_CLIENT_ID}&scope=write_customers&redirect_uri=${redirectUri}`;
+  const redirectUri = `https://shopify-test-server.onrender.com/callback`;
+  const installUrl = `https://${shop}/admin/oauth/authorize?client_id=${SHOPIFY_CLIENT_ID}&scope=write_customers&redirect_uri=${encodeURIComponent(
+    redirectUri
+  )}`;
 
   res.redirect(installUrl);
 });
