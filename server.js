@@ -97,7 +97,7 @@ app.post('/api/create-customer', async (req, res) => {
 
   try {
     const response = await axios.post(
-      `https://${SHOPIFY_STORE_URL}/admin/api/2021-01/customers.json`,
+      `https://${SHOPIFY_STORE_URL}/admin/api/2024-07/customers.json`,
       {
         customer: {
           first_name: name,
@@ -120,11 +120,7 @@ app.post('/api/create-customer', async (req, res) => {
       res.json({ success: false, message: 'Failed to create customer.' });
     }
   } catch (error) {
-    console.error(
-      'Error creating customer:',
-      error.response ? error.response.data : error.message
-    );
-    res.status(500).send('An error occurred while creating the customer.');
+    res.status(500).send(error.message);
   }
 });
 
