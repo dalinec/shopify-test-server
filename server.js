@@ -11,8 +11,12 @@ const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cors());
 
-const { SHOPIFY_CLIENT_ID, SHOPIFY_CLIENT_SECRET, SHOPIFY_STORE_URL } =
-  process.env;
+const {
+  SHOPIFY_CLIENT_ID,
+  SHOPIFY_CLIENT_SECRET,
+  SHOPIFY_STORE_URL,
+  ACCESS_TOKEN,
+} = process.env;
 
 if (!SHOPIFY_CLIENT_SECRET) {
   console.error('SHOPIFY_CLIENT_SECRET is not set.');
@@ -75,7 +79,6 @@ app.get('/callback', async (req, res) => {
     );
 
     accessToken = response.data.access_token;
-    console.log('Access Token:', accessToken); // Ensure this logs correctly
 
     res.send(
       `Authorization successful! You can now close this tab. The access token is ${accessToken}`
@@ -114,7 +117,7 @@ app.post('/api/create-customer', async (req, res) => {
       },
       {
         headers: {
-          'X-Shopify-Access-Token': accessToken,
+          'X-Shopify-Access-Token': ACCESS_TOKEN,
           'Content-Type': 'application/json',
         },
       }
