@@ -11,7 +11,6 @@ const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cors());
 
-// Ensure environment variables are loaded
 const { SHOPIFY_CLIENT_ID, SHOPIFY_CLIENT_SECRET, SHOPIFY_STORE_URL } =
   process.env;
 
@@ -50,7 +49,13 @@ app.get('/callback', async (req, res) => {
     // Generate the HMAC hash to verify the authenticity of the request
     const generatedHmac = crypto
       .createHmac('sha256', SHOPIFY_CLIENT_SECRET)
-      .update(new URLSearchParams(req.query).toString())
+      .update(
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(req.query).filter(([key]) => key !== 'hmac')
+          )
+        ).toString()
+      )
       .digest('hex');
 
     if (generatedHmac !== hmac) {
