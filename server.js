@@ -32,29 +32,40 @@ app.get('/auth', (req, res) => {
 });
 
 // Step 2: Shopify redirects to this endpoint with the authorization code
+// Ensure SHOPIFY_CLIENT_SECRET is loaded
+if (!process.env.SHOPIFY_CLIENT_SECRET) {
+  console.error('SHOPIFY_CLIENT_SECRET is not set.');
+  process.exit(1);
+}
+
 app.get('/callback', async (req, res) => {
   const { shop, code, hmac } = req.query;
 
   if (!shop || !code || !hmac) {
+    console.error('Missing parameters:', req.query);
     return res.status(400).send('Required parameters missing.');
   }
 
-  // Generate the HMAC hash to verify the authenticity of the request
-  const generatedHmac = crypto
-    .createHmac('sha256', SHOPIFY_CLIENT_SECRET)
-    .update(new URLSearchParams(req.query).toString())
-    .digest('hex');
-
-  if (generatedHmac !== hmac) {
-    return res.status(400).send('HMAC validation failed.');
-  }
-
   try {
+    // Generate the HMAC hash to verify the authenticity of the request
+    const generatedHmac = crypto
+      .createHmac('sha256', process.env.SHOPIFY_CLIENT_SECRET)
+      .update(new URLSearchParams(req.query).toString())
+      .digest('hex');
+
+    if (generatedHmac !== hmac) {
+      console.error('HMAC validation failed:', {
+        generatedHmac,
+        receivedHmac: hmac,
+      });
+      return res.status(400).send('HMAC validation failed.');
+    }
+
     const response = await axios.post(
       `https://${shop}/admin/oauth/access_token`,
       {
-        client_id: SHOPIFY_CLIENT_ID,
-        client_secret: SHOPIFY_CLIENT_SECRET,
+        client_id: process.env.SHOPIFY_CLIENT_ID,
+        client_secret: process.env.SHOPIFY_CLIENT_SECRET,
         code,
       }
     );
@@ -63,6 +74,10 @@ app.get('/callback', async (req, res) => {
 
     res.send('Authorization successful! You can now close this tab.');
   } catch (error) {
+    console.error(
+      'Error exchanging code for access token:',
+      error.response ? error.response.data : error.message
+    );
     res.status(500).send(error.message);
   }
 });
