@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
+const crypto = require('crypto');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -32,10 +33,20 @@ app.get('/auth', (req, res) => {
 
 // Step 2: Shopify redirects to this endpoint with the authorization code
 app.get('/callback', async (req, res) => {
-  const { shop, code } = req.query;
+  const { shop, code, hmac } = req.query;
 
-  if (!shop || !code) {
+  if (!shop || !code || !hmac) {
     return res.status(400).send('Required parameters missing.');
+  }
+
+  // Generate the HMAC hash to verify the authenticity of the request
+  const generatedHmac = crypto
+    .createHmac('sha256', SHOPIFY_CLIENT_SECRET)
+    .update(new URLSearchParams(req.query).toString())
+    .digest('hex');
+
+  if (generatedHmac !== hmac) {
+    return res.status(400).send('HMAC validation failed.');
   }
 
   try {
@@ -55,7 +66,6 @@ app.get('/callback', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-
 // Step 3: Use the access token to create a customer
 app.post('/api/create-customer', async (req, res) => {
   const { name, email } = req.body;
