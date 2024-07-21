@@ -76,6 +76,8 @@ app.get('/callback', async (req, res) => {
     );
 
     accessToken = response.data.access_token;
+    // Log the access token to the console
+    console.log('Access Token:', accessToken);
 
     res.send('Authorization successful! You can now close this tab.');
   } catch (error) {
@@ -92,7 +94,9 @@ app.post('/api/create-customer', async (req, res) => {
   const { name, email } = req.body;
 
   if (!accessToken) {
-    return res.status(401).send('Unauthorized: Missing access token.');
+    return res
+      .status(401)
+      .json({ message: 'Unauthorized: Missing access token.' });
   }
 
   try {
@@ -114,16 +118,23 @@ app.post('/api/create-customer', async (req, res) => {
       }
     );
 
+    console.log('Shopify response:', response.data); // Log response
+
     if (response.data.customer) {
       res.json({ success: true });
     } else {
       res.json({ success: false, message: 'Failed to create customer.' });
     }
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error(
+      'Error creating customer:',
+      error.response ? error.response.data : error.message
+    );
+    res.status(500).json({ message: error.message });
   }
 });
 
+console.log(accessToken);
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
