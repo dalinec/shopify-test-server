@@ -96,13 +96,11 @@ app.get('/callback', async (req, res) => {
 app.post('/api/create-customer', async (req, res) => {
   const { name, email } = req.body;
 
-  if (!accessToken) {
-    return res
-      .status(401)
-      .json({ message: 'Unauthorized: Missing access token.' });
-  }
-
-  console.log(accessToken);
+  // if (!accessToken) {
+  //   return res
+  //     .status(401)
+  //     .json({ message: 'Unauthorized: Missing access token.' });
+  // }
 
   try {
     const response = await axios.post(
