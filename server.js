@@ -77,7 +77,9 @@ app.get('/callback', async (req, res) => {
     accessToken = response.data.access_token;
     console.log('Access Token:', accessToken); // Ensure this logs correctly
 
-    res.send('Authorization successful! You can now close this tab.');
+    res.send(
+      `Authorization successful! You can now close this tab. The access token is ${accessToken}`
+    );
   } catch (error) {
     console.error(
       'Error during callback:',
