@@ -120,7 +120,11 @@ app.post('/api/create-customer', async (req, res) => {
       res.json({ success: false, message: 'Failed to create customer.' });
     }
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error(
+      'Error creating customer:',
+      error.response ? error.response.data : error.message
+    );
+    res.status(500).send('An error occurred while creating the customer.');
   }
 });
 
