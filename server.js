@@ -11,8 +11,14 @@ const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cors());
 
+// Ensure environment variables are loaded
 const { SHOPIFY_CLIENT_ID, SHOPIFY_CLIENT_SECRET, SHOPIFY_STORE_URL } =
   process.env;
+
+if (!SHOPIFY_CLIENT_SECRET) {
+  console.error('SHOPIFY_CLIENT_SECRET is not set.');
+  process.exit(1);
+}
 
 let accessToken = '';
 
@@ -32,12 +38,6 @@ app.get('/auth', (req, res) => {
 });
 
 // Step 2: Shopify redirects to this endpoint with the authorization code
-// Ensure SHOPIFY_CLIENT_SECRET is loaded
-if (!process.env.SHOPIFY_CLIENT_SECRET) {
-  console.error('SHOPIFY_CLIENT_SECRET is not set.');
-  process.exit(1);
-}
-
 app.get('/callback', async (req, res) => {
   const { shop, code, hmac } = req.query;
 
@@ -49,7 +49,7 @@ app.get('/callback', async (req, res) => {
   try {
     // Generate the HMAC hash to verify the authenticity of the request
     const generatedHmac = crypto
-      .createHmac('sha256', process.env.SHOPIFY_CLIENT_SECRET)
+      .createHmac('sha256', SHOPIFY_CLIENT_SECRET)
       .update(new URLSearchParams(req.query).toString())
       .digest('hex');
 
@@ -64,8 +64,8 @@ app.get('/callback', async (req, res) => {
     const response = await axios.post(
       `https://${shop}/admin/oauth/access_token`,
       {
-        client_id: process.env.SHOPIFY_CLIENT_ID,
-        client_secret: process.env.SHOPIFY_CLIENT_SECRET,
+        client_id: SHOPIFY_CLIENT_ID,
+        client_secret: SHOPIFY_CLIENT_SECRET,
         code,
       }
     );
@@ -81,6 +81,7 @@ app.get('/callback', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
 // Step 3: Use the access token to create a customer
 app.post('/api/create-customer', async (req, res) => {
   const { name, email } = req.body;
