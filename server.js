@@ -92,7 +92,7 @@ app.get('/callback', async (req, res) => {
   }
 });
 
-// Step 3: Use the access token to create a customer
+// Use the access token to create a customer
 app.post('/api/create-customer', async (req, res) => {
   const { name, email } = req.body;
 
@@ -116,6 +116,11 @@ app.post('/api/create-customer', async (req, res) => {
           email: email,
           verified_email: true,
           accepts_marketing: true,
+          email_marketing_consent: {
+            state: 'subscribed',
+            opt_in_level: 'confirmed_opt_in',
+            consent_updated_at: new Date(),
+          },
         },
       },
       {
