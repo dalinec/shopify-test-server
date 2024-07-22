@@ -107,7 +107,7 @@ app.post('/api/create-customer', async (req, res) => {
       `https://${SHOPIFY_STORE_URL}/admin/api/2024-07/customers.json`,
       {
         customer: {
-          first_name: name,
+          name: name,
           email: email,
           verified_email: true,
           accepts_marketing: true,
