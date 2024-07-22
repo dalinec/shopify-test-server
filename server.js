@@ -25,7 +25,7 @@ if (!SHOPIFY_CLIENT_SECRET) {
 
 let accessToken = '';
 
-// Step 1: Redirect to Shopify to get the authorization code
+//Redirect to Shopify to get the authorization code
 app.get('/auth', (req, res) => {
   const shop = req.query.shop;
   if (!shop) {
@@ -40,7 +40,7 @@ app.get('/auth', (req, res) => {
   res.redirect(installUrl);
 });
 
-// Step 2: Shopify redirects to this endpoint with the authorization code
+//Shopify redirects to this endpoint with the authorization code
 app.get('/callback', async (req, res) => {
   const { shop, code, hmac } = req.query;
 
@@ -96,6 +96,10 @@ app.get('/callback', async (req, res) => {
 app.post('/api/create-customer', async (req, res) => {
   const { name, email } = req.body;
 
+  const nameParts = name.split(' ');
+  const first_name = nameParts[0];
+  const last_name = nameParts.slice(1).join(' ');
+
   // if (!accessToken) {
   //   return res
   //     .status(401)
@@ -107,7 +111,8 @@ app.post('/api/create-customer', async (req, res) => {
       `https://${SHOPIFY_STORE_URL}/admin/api/2024-07/customers.json`,
       {
         customer: {
-          name: name,
+          first_name: first_name,
+          last_name: last_name,
           email: email,
           verified_email: true,
           accepts_marketing: true,
